@@ -201,17 +201,19 @@ const ViewMonthlyTasks = () => {
               </div>
 
               {task.note && (
-                <div className="mb-4">
-                  <p className="text-gray-600 text-sm">{task.note}</p>
+                <div className="mb-4 p-3 sm:p-4 bg-gray-50 rounded-xl text-xs sm:text-sm break-words">
+                  <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-1">Your Note:</h4>
+                  <p className="text-gray-600">{task.note}</p>
                 </div>
               )}
 
               {task.supervisorNote && (
-                <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-1">Supervisor Feedback:
-                  {task.reviewedBy && ` (by ${task.reviewedBy?.name})`}
+                <div className="p-3 sm:p-4 bg-blue-50 rounded-xl border border-blue-200 text-xs sm:text-sm break-words">
+                  <h4 className="text-xs sm:text-sm font-semibold text-blue-800 mb-1">
+                    Supervisor Feedback:
+                    {task.reviewedBy && ` (by ${task.reviewedBy?.name})`}
                   </h4>
-                  <p className="text-blue-700 text-sm">{task.supervisorNote}</p>
+                  <p className="text-blue-700">{task.supervisorNote}</p>
                 </div>
               )}
             </div>
