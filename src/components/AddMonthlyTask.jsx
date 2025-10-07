@@ -17,20 +17,21 @@ const AddMonthlyTask = () => {
   const [selectedDate, setSelectedDate] = useState('');
 
   useEffect(() => {
+    const fetchProjectDetails = async () => {
+      try {
+        const response = await engineerAPI.getMyProjects();
+        const projectData = response.data.find(p => p._id === projectId);
+        setProject(projectData);
+      } catch (err) {
+        setMessage('Failed to load project details');
+      } finally {
+        setLoading(false);
+      }
+    }; 
     fetchProjectDetails();
   }, [projectId]);
 
-  const fetchProjectDetails = async () => {
-    try {
-      const response = await engineerAPI.getMyProjects();
-      const projectData = response.data.find(p => p._id === projectId);
-      setProject(projectData);
-    } catch (err) {
-      setMessage('Failed to load project details');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const addTaskField = () => {
     setTasks([...tasks, { title: '', note: '' }]);
@@ -96,44 +97,44 @@ const AddMonthlyTask = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600">Loading project details...</p>
+      <div className="flex justify-center items-center py-8 sm:py-12">
+        <div className="flex flex-col items-center space-y-3 sm:space-y-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 text-sm sm:text-base">Loading project details...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto w-full px-2 sm:px-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/dashboard/add-tasks')}
-            className="p-3 hover:bg-gray-100 rounded-2xl transition-colors"
+            className="p-2 sm:p-3 hover:bg-gray-100 rounded-xl sm:rounded-2xl transition-colors"
           >
-            <FiArrowLeft className="w-5 h-5 text-gray-600" />
+            <FiArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Add Monthly Tasks</h1>
-            <p className="text-gray-600">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Add Monthly Tasks</h1>
+            <p className="text-gray-600 text-sm sm:text-base">
               {project?.name} - Add multiple monthly tasks
             </p>
           </div>
         </div>
-        <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-          <FiCalendar className="w-6 h-6" />
+        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg">
+          <FiCalendar className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
         </div>
       </div>
 
       {/* Form Card */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg border border-gray-200/50 p-4 sm:p-6 lg:p-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Message */}
           {message && (
-            <div className={`p-4 rounded-2xl border ${
+            <div className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border text-sm sm:text-base ${
               message.includes('successfully') 
                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
                 : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -143,7 +144,7 @@ const AddMonthlyTask = () => {
           )}
 
           {/* Date Selection */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <label className="block text-sm font-semibold text-gray-700">
               Select Date *
             </label>
@@ -153,24 +154,24 @@ const AddMonthlyTask = () => {
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 required
-                className="w-full px-4 py-4 pl-12 border-2 border-gray-200 rounded-2xl transition-all duration-300 bg-white text-gray-800 group-hover:border-green-300 shadow-sm focus:border-green-500 focus:ring-0 focus:outline-none"
+                className="w-full px-3 sm:px-4 py-3 sm:py-4 pr-10 sm:pr-12 border-2 border-gray-200 rounded-xl sm:rounded-2xl transition-all duration-300 bg-white text-gray-800 group-hover:border-green-300 shadow-sm focus:border-green-500 focus:ring-0 focus:outline-none text-sm sm:text-base"
               />
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
-                <FiCalendar className="w-5 h-5 text-gray-400" />
+              <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2">
+                <FiCalendar className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
               </div>
             </div>
           </div>
 
           {/* Tasks List */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
               <h3 className="text-lg font-semibold text-gray-800">
                 Monthly Tasks ({tasks.length})
               </h3>
               <button
                 type="button"
                 onClick={addTaskField}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors"
+                className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg sm:rounded-xl transition-colors text-sm sm:text-base w-full sm:w-auto"
               >
                 <FiPlus className="w-4 h-4" />
                 Add Another Task
@@ -178,14 +179,14 @@ const AddMonthlyTask = () => {
             </div>
 
             {tasks.map((task, index) => (
-              <div key={index} className="border-2 border-gray-200 rounded-2xl p-4 space-y-4">
+              <div key={index} className="border-2 border-gray-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-3 sm:space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-semibold text-gray-700">Task {index + 1}</h4>
+                  <h4 className="font-semibold text-gray-700 text-sm sm:text-base">Task {index + 1}</h4>
                   {tasks.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeTaskField(index)}
-                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                      className="p-1 sm:p-2 text-rose-600 hover:bg-rose-50 rounded-lg sm:rounded-xl transition-colors"
                     >
                       <FiX className="w-4 h-4" />
                     </button>
@@ -202,7 +203,7 @@ const AddMonthlyTask = () => {
                     value={task.title}
                     onChange={(e) => updateTaskField(index, 'title', e.target.value)}
                     placeholder="Enter task title..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm sm:text-base"
                     required
                   />
                 </div>
@@ -217,7 +218,7 @@ const AddMonthlyTask = () => {
                     onChange={(e) => updateTaskField(index, 'note', e.target.value)}
                     placeholder="Add any additional notes..."
                     rows="3"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none text-sm sm:text-base"
                   />
                 </div>
               </div>
@@ -225,20 +226,20 @@ const AddMonthlyTask = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex space-x-4 pt-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6">
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-2xl shadow-2xl transition-all duration-300 flex items-center justify-center gap-3 text-base tracking-wide focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed group transform hover:scale-[1.02]"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base tracking-wide focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed group transform hover:scale-[1.02]"
             >
               {saving ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Adding Tasks...</span>
                 </>
               ) : (
                 <>
-                  <FiSave className="w-5 h-5 transform group-hover:scale-110 transition-transform" />
+                  <FiSave className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:scale-110 transition-transform" />
                   <span>Add {tasks.length} Monthly Task(s)</span>
                 </>
               )}
@@ -247,7 +248,7 @@ const AddMonthlyTask = () => {
             <button
               type="button"
               onClick={() => navigate('/dashboard/add-tasks')}
-              className="px-8 py-4 border-2 border-gray-200 text-gray-700 rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-semibold"
+              className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-2 border-gray-200 text-gray-700 rounded-xl sm:rounded-2xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-semibold text-sm sm:text-base"
             >
               Cancel
             </button>
