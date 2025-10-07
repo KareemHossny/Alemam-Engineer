@@ -75,13 +75,22 @@ const ViewDailyTasks = () => {
     }
   };
 
-  const getStatusIcon = (status) => {
-    const icons = {
-      pending: <FiClock className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />,
-      done: <FiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />,
-      failed: <FiAlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-rose-500" />
+  const getStatusStyles = (status) => {
+    const styles = {
+      pending: {
+        container: 'bg-orange-100 text-orange-800 border-orange-200',
+        icon: <FiClock className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
+      },
+      done: {
+        container: 'bg-green-100 text-green-800 border-green-200',
+        icon: <FiCheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
+      },
+      failed: {
+        container: 'bg-rose-100 text-rose-800 border-rose-200',
+        icon: <FiAlertCircle className="w-3 h-3 sm:w-4 sm:h-4 text-rose-500" />
+      }
     };
-    return icons[status] || icons.pending;
+    return styles[status] || styles.pending;
   };
 
   const getStatusText = (status) => {
@@ -186,8 +195,8 @@ const ViewDailyTasks = () => {
                     <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800">
                       {task.title}
                     </h3>
-                    <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border bg-orange-100 text-orange-800 border-orange-200">
-                      {getStatusIcon(task.status)}
+                    <div className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium border ${getStatusStyles(task.status).container}`}>
+                      {getStatusStyles(task.status).icon}
                       <span>{getStatusText(task.status)}</span>
                     </div>
                   </div>
