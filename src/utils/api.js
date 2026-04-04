@@ -51,11 +51,13 @@ export const engineerAPI = {
     params: date ? { date } : undefined,
   }),
   addDailyTask: (taskData) => api.post('/engineer/daily-tasks', taskData),
+  addDailyTasksBulk: (tasks) => api.post('/engineer/daily-tasks/bulk', tasks),
   deleteDailyTask: (taskId) => api.delete(`/engineer/daily-tasks/${taskId}`),
   
   // Monthly Tasks
   getMonthlyTasks: (projectId) => api.get(`/engineer/monthly-tasks/${projectId}`),
   addMonthlyTask: (taskData) => api.post('/engineer/monthly-tasks', taskData),
+  addMonthlyTasksBulk: (tasks) => api.post('/engineer/monthly-tasks/bulk', tasks),
   deleteMonthlyTask: (taskId) => api.delete(`/engineer/monthly-tasks/${taskId}`),
 };
 

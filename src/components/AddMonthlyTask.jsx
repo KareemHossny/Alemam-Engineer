@@ -3,6 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiPlus, FiCalendar, FiArrowLeft, FiSave, FiX } from 'react-icons/fi';
 import { engineerAPI } from '../utils/api';
 
+const formatBulkFailureMessage = (fallbackMessage, failedItems) => {
+  if (!Array.isArray(failedItems) || failedItems.length === 0) {
+    return fallbackMessage;
+  }
+
+  const preview = failedItems
+    .slice(0, 2)
+    .map((item) => `Task ${item.index + 1}: ${item.reason}`)
+    .join(' ');
+  const remainingCount = failedItems.length - 2;
+
+  return `${fallbackMessage} ${preview}${remainingCount > 0 ? ` (+${remainingCount} more)` : ''}`.trim();
+};
+
 const AddMonthlyTask = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -69,19 +83,17 @@ const AddMonthlyTask = () => {
     setMessage('');
 
     try {
-      // Create all monthly tasks
-      const promises = validTasks.map(task => 
-        engineerAPI.addMonthlyTask({
+      const response = await engineerAPI.addMonthlyTasksBulk(
+        validTasks.map((task) => ({
           projectId,
           title: task.title,
           note: task.note,
-          date: selectedDate
-        })
+          date: selectedDate,
+        }))
       );
-
-      await Promise.all(promises);
+      const createdCount = response.data?.createdCount ?? validTasks.length;
       
-      setMessage(`${validTasks.length} monthly task(s) added successfully!`);
+      setMessage(response.data?.message || `${createdCount} monthly task(s) added successfully!`);
       setTasks([{ title: '', note: '' }]);
       
       setTimeout(() => {
@@ -89,7 +101,8 @@ const AddMonthlyTask = () => {
       }, 2000);
       
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Failed to add monthly tasks');
+      const fallbackMessage = err.response?.data?.message || 'Failed to add monthly tasks';
+      setMessage(formatBulkFailureMessage(fallbackMessage, err.response?.data?.failedItems));
     } finally {
       setSaving(false);
     }

@@ -7,6 +7,20 @@ const getLocalDateInputValue = () => (
   new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
 );
 
+const formatBulkFailureMessage = (fallbackMessage, failedItems) => {
+  if (!Array.isArray(failedItems) || failedItems.length === 0) {
+    return fallbackMessage;
+  }
+
+  const preview = failedItems
+    .slice(0, 2)
+    .map((item) => `Task ${item.index + 1}: ${item.reason}`)
+    .join(' ');
+  const remainingCount = failedItems.length - 2;
+
+  return `${fallbackMessage} ${preview}${remainingCount > 0 ? ` (+${remainingCount} more)` : ''}`.trim();
+};
+
 const AddDailyTask = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -72,19 +86,17 @@ const AddDailyTask = () => {
     setMessage('');
 
     try {
-      // Create all daily tasks
-      const promises = validTasks.map(task => 
-        engineerAPI.addDailyTask({
+      const response = await engineerAPI.addDailyTasksBulk(
+        validTasks.map((task) => ({
           projectId,
           title: task.title,
           note: task.note,
           date: selectedDate,
-        })
+        }))
       );
-
-      await Promise.all(promises);
+      const createdCount = response.data?.createdCount ?? validTasks.length;
       
-      setMessage(`${validTasks.length} daily task(s) added successfully!`);
+      setMessage(response.data?.message || `${createdCount} daily task(s) added successfully!`);
       setTasks([{ title: '', note: '' }]);
       
       setTimeout(() => {
@@ -92,7 +104,8 @@ const AddDailyTask = () => {
       }, 2000);
       
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Failed to add daily tasks');
+      const fallbackMessage = err.response?.data?.message || 'Failed to add daily tasks';
+      setMessage(formatBulkFailureMessage(fallbackMessage, err.response?.data?.failedItems));
     } finally {
       setSaving(false);
     }
