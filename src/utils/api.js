@@ -45,7 +45,9 @@ export const engineerAPI = {
   getMyProjects: () => api.get('/engineer/projects'),
   
   // Daily Tasks
-  getDailyTasks: (projectId) => api.get(`/engineer/daily-tasks/${projectId}`),
+  getDailyTasks: (projectId, date) => api.get(`/engineer/daily-tasks/${projectId}`, {
+    params: date ? { date } : undefined,
+  }),
   addDailyTask: (taskData) => api.post('/engineer/daily-tasks', taskData),
   deleteDailyTask: (taskId) => api.delete(`/engineer/daily-tasks/${taskId}`),
   

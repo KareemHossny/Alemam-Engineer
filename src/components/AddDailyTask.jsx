@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiPlus, FiCalendar, FiArrowLeft, FiSave, FiX } from 'react-icons/fi';
 import { engineerAPI } from '../utils/api';
 
+const getLocalDateInputValue = () => (
+  new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
+);
+
 const AddDailyTask = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -14,7 +18,7 @@ const AddDailyTask = () => {
   
   // State for tasks
   const [tasks, setTasks] = useState([{ title: '', note: '' }]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getLocalDateInputValue());
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -73,7 +77,8 @@ const AddDailyTask = () => {
         engineerAPI.addDailyTask({
           projectId,
           title: task.title,
-          note: task.note
+          note: task.note,
+          date: selectedDate,
         })
       );
 
