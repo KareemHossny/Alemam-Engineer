@@ -4,21 +4,24 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: 'https://alemam-backend.vercel.app/api', 
   timeout: 15000,
+  withCredentials: true,
 });
 
-// Request Interceptor
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('engineerToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+const shouldRedirectToLogin = (error) => {
+  if (error.response?.status !== 401) {
+    return false;
   }
-);
+
+  if (error.config?.skipAuthRedirect) {
+    return false;
+  }
+
+  if (error.config?.url?.includes('/login')) {
+    return false;
+  }
+
+  return window.location.pathname !== '/login';
+};
 
 // Response Interceptor
 api.interceptors.response.use(
@@ -26,9 +29,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('engineerToken');
-      localStorage.removeItem('engineerInfo');
+    if (shouldRedirectToLogin(error)) {
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -38,8 +39,9 @@ api.interceptors.response.use(
 // وظائف الـ Engineer
 export const engineerAPI = {
   // Authentication
-  login: (credentials) => api.post('/engineer/login', credentials),
+  login: (credentials) => api.post('/engineer/login', credentials, { skipAuthRedirect: true }),
   logout: () => api.post('/engineer/logout'),
+  getCurrentUser: () => api.get('/engineer/me', { skipAuthRedirect: true }),
   
   // Projects
   getMyProjects: () => api.get('/engineer/projects'),
@@ -66,25 +68,6 @@ export const checkServerStatus = async () => {
     return response.status === 200;
   } catch (error) {
     return false;
-  }
-};
-
-// وظيفة للحصول على معلومات المهندس من الـ Token
-export const getEngineerInfo = () => {
-  try {
-    const token = localStorage.getItem('engineerToken');
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return {
-        name: payload.name,
-        email: payload.email,
-        id: payload.id
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error('Error getting engineer info:', error);
-    return null;
   }
 };
 

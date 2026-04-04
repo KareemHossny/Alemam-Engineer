@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import EngineerLogin from './components/EngineerLogin';
 import EngineerDashboard from './components/EngineerDashboard';
-import { checkServerStatus } from './utils/api';
+import { checkServerStatus, engineerAPI } from './utils/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,34 +12,49 @@ function App() {
 
   // التحقق من حالة السيرفر والمصادقة
   useEffect(() => {
+    let isMounted = true;
+
     const initApp = async () => {
       const isOnline = await checkServerStatus();
+
+      if (!isMounted) {
+        return;
+      }
+
       setServerOnline(isOnline);
 
-      const token = localStorage.getItem('engineerToken');
-      const savedEngineerInfo = localStorage.getItem('engineerInfo');
-      
-      if (token && isOnline && savedEngineerInfo) {
-        setIsAuthenticated(true);
-        setEngineerInfo(JSON.parse(savedEngineerInfo));
+      if (isOnline) {
+        try {
+          const response = await engineerAPI.getCurrentUser();
+          if (isMounted && response.data?.user) {
+            setIsAuthenticated(true);
+            setEngineerInfo(response.data.user);
+          }
+        } catch (error) {
+          if (error.response?.status !== 401) {
+            console.error('Error restoring engineer session:', error);
+          }
+        }
       }
-      
-      setLoading(false);
+
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     initApp();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const handleLogin = (token, userInfo) => {
-    localStorage.setItem('engineerToken', token);
-    localStorage.setItem('engineerInfo', JSON.stringify(userInfo));
+  const handleLogin = (userInfo) => {
     setIsAuthenticated(true);
     setEngineerInfo(userInfo);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('engineerToken');
-    localStorage.removeItem('engineerInfo');
     setIsAuthenticated(false);
     setEngineerInfo(null);
   };

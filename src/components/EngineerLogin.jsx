@@ -27,19 +27,13 @@ const EngineerLogin = ({ onLogin, serverOnline }) => {
     setError('');
 
     try {
-      const response = await engineerAPI.login(formData);
+      await engineerAPI.login(formData);
+      const sessionResponse = await engineerAPI.getCurrentUser();
       
-      if (response.data?.token) {
-        try {
-          localStorage.setItem('engineerToken', response.data.token);
-          localStorage.setItem('engineerInfo', JSON.stringify(response.data.user));
-          onLogin(response.data.token, response.data.user);
-        } catch (storageError) {
-          console.error('Storage error:', storageError);
-          setError('Session storage failed. Please try again.');
-        }
+      if (sessionResponse.data?.user) {
+        onLogin(sessionResponse.data.user);
       } else {
-        throw new Error('No token in response');
+        throw new Error('Session was not established');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message 
