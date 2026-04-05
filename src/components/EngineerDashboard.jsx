@@ -36,8 +36,7 @@ const EngineerDashboard = ({ onLogout, engineerInfo }) => {
 
   const fetchStats = async () => {
     try {
-      const response = await engineerAPI.getDashboardStats();
-      const dashboardStats = response.data?.data || {};
+      const dashboardStats = await engineerAPI.getDashboardStats();
       
       setStats({
         totalProjects: dashboardStats.totalProjects || 0,

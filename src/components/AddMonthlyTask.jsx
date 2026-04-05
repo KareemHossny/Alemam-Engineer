@@ -33,11 +33,11 @@ const AddMonthlyTask = () => {
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const response = await engineerAPI.getMyProjects();
-        const projectData = response.data.find(p => p._id === projectId);
+        const projects = await engineerAPI.getMyProjects();
+        const projectData = projects.find((item) => item._id === projectId) || null;
         setProject(projectData);
       } catch (err) {
-        setMessage('Failed to load project details');
+        setMessage(err.message || 'Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ const AddMonthlyTask = () => {
     setMessage('');
 
     try {
-      const response = await engineerAPI.addMonthlyTasksBulk(
+      const bulkResult = await engineerAPI.addMonthlyTasksBulk(
         validTasks.map((task) => ({
           projectId,
           title: task.title,
@@ -91,9 +91,9 @@ const AddMonthlyTask = () => {
           date: selectedDate,
         }))
       );
-      const createdCount = response.data?.createdCount ?? validTasks.length;
+      const createdCount = bulkResult.createdCount || validTasks.length;
       
-      setMessage(response.data?.message || `${createdCount} monthly task(s) added successfully!`);
+      setMessage(`${createdCount} monthly task(s) added successfully!`);
       setTasks([{ title: '', note: '' }]);
       
       setTimeout(() => {
@@ -101,8 +101,8 @@ const AddMonthlyTask = () => {
       }, 2000);
       
     } catch (err) {
-      const fallbackMessage = err.response?.data?.message || 'Failed to add monthly tasks';
-      setMessage(formatBulkFailureMessage(fallbackMessage, err.response?.data?.failedItems));
+      const fallbackMessage = err.message || 'Failed to add monthly tasks';
+      setMessage(formatBulkFailureMessage(fallbackMessage, err.details?.failedItems));
     } finally {
       setSaving(false);
     }

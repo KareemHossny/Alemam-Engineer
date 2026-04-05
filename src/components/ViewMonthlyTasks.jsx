@@ -3,6 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiEye, FiCalendar, FiArrowLeft, FiCheckCircle, FiClock, FiAlertCircle, FiTrash2 } from 'react-icons/fi';
 import { engineerAPI } from '../utils/api';
 
+const getLocalMonthInputValue = () => (
+  new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 7)
+);
+
 const ViewMonthlyTasks = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -10,23 +14,18 @@ const ViewMonthlyTasks = () => {
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(getLocalMonthInputValue());
   const [message, setMessage] = useState('');
 
   // Fetch project details and set default month
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const response = await engineerAPI.getMyProjects();
-        const projectData = response.data.find(p => p._id === projectId);
+        const projects = await engineerAPI.getMyProjects();
+        const projectData = projects.find((item) => item._id === projectId) || null;
         setProject(projectData);
-        
-        // Set default month to current month
-        const currentDate = new Date();
-        const currentMonth = currentDate.toISOString().substring(0, 7);
-        setSelectedMonth(currentMonth);
       } catch (err) {
-        setMessage('Failed to load project details');
+        setMessage(err.message || 'Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -41,10 +40,10 @@ const ViewMonthlyTasks = () => {
       if (!project || !selectedMonth) return;
 
       try {
-        const response = await engineerAPI.getMonthlyTasks(projectId);
+        const taskPage = await engineerAPI.getMonthlyTasks(projectId);
         
         // Filter tasks based on selected month
-        const filteredTasks = response.data.filter(task => {
+        const filteredTasks = (taskPage.data || []).filter(task => {
           const taskMonth = new Date(task.date).toISOString().substring(0, 7);
           return taskMonth === selectedMonth;
         });
@@ -69,14 +68,14 @@ const ViewMonthlyTasks = () => {
       setMessage('Task deleted successfully');
       
       // Refresh tasks
-      const response = await engineerAPI.getMonthlyTasks(projectId);
-      const filteredTasks = response.data.filter(task => {
+      const taskPage = await engineerAPI.getMonthlyTasks(projectId);
+      const filteredTasks = (taskPage.data || []).filter(task => {
         const taskMonth = new Date(task.date).toISOString().substring(0, 7);
         return taskMonth === selectedMonth;
       });
       setTasks(filteredTasks);
     } catch (err) {
-      setMessage('Error deleting task');
+      setMessage(err.message || 'Error deleting task');
     }
   };
 

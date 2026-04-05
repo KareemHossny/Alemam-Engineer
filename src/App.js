@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import EngineerLogin from './components/EngineerLogin';
 import EngineerDashboard from './components/EngineerDashboard';
-import { checkServerStatus, engineerAPI } from './utils/api';
+import { AUTH_REQUIRED_EVENT, checkServerStatus, engineerAPI } from './utils/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,6 +13,15 @@ function App() {
   // التحقق من حالة السيرفر والمصادقة
   useEffect(() => {
     let isMounted = true;
+
+    const handleAuthRequired = () => {
+      if (!isMounted) {
+        return;
+      }
+
+      setIsAuthenticated(false);
+      setEngineerInfo(null);
+    };
 
     const initApp = async () => {
       const isOnline = await checkServerStatus();
@@ -25,13 +34,13 @@ function App() {
 
       if (isOnline) {
         try {
-          const response = await engineerAPI.getCurrentUser();
-          if (isMounted && response.data?.user) {
+          const session = await engineerAPI.getCurrentUser();
+          if (isMounted && session.user) {
             setIsAuthenticated(true);
-            setEngineerInfo(response.data.user);
+            setEngineerInfo(session.user);
           }
         } catch (error) {
-          if (error.response?.status !== 401) {
+          if (error.status !== 401) {
             console.error('Error restoring engineer session:', error);
           }
         }
@@ -43,9 +52,11 @@ function App() {
     };
 
     initApp();
+    window.addEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired);
 
     return () => {
       isMounted = false;
+      window.removeEventListener(AUTH_REQUIRED_EVENT, handleAuthRequired);
     };
   }, []);
 

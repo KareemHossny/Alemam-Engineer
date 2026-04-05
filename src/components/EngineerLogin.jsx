@@ -28,17 +28,15 @@ const EngineerLogin = ({ onLogin, serverOnline }) => {
 
     try {
       await engineerAPI.login(formData);
-      const sessionResponse = await engineerAPI.getCurrentUser();
+      const session = await engineerAPI.getCurrentUser();
       
-      if (sessionResponse.data?.user) {
-        onLogin(sessionResponse.data.user);
+      if (session.user) {
+        onLogin(session.user);
       } else {
         throw new Error('Session was not established');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message 
-        || err.message 
-        || 'Login failed. Please check your credentials.';
+      const errorMessage = err.message || 'Login failed. Please check your credentials.';
       setError(errorMessage);
     } finally {
       setLoading(false);

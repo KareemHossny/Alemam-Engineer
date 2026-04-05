@@ -14,10 +14,10 @@ const AddTasks = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await engineerAPI.getMyProjects();
-      setProjects(response.data);
+      const projectList = await engineerAPI.getMyProjects();
+      setProjects(projectList);
     } catch (err) {
-      setError('Failed to load projects');
+      setError(err.message || 'Failed to load projects');
       console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);

@@ -40,11 +40,11 @@ const ViewDailyTasks = () => {
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const response = await engineerAPI.getMyProjects();
-        const projectData = response.data.find((item) => item._id === projectId);
+        const projects = await engineerAPI.getMyProjects();
+        const projectData = projects.find((item) => item._id === projectId) || null;
         setProject(projectData);
       } catch (error) {
-        setMessage('Failed to load project details');
+        setMessage(error.message || 'Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -60,13 +60,13 @@ const ViewDailyTasks = () => {
       }
 
       try {
-        const response = await engineerAPI.getDailyTasks(projectId, {
+        const taskPage = await engineerAPI.getDailyTasks(projectId, {
           date: selectedDate,
           page,
           limit: DEFAULT_LIMIT,
         });
-        setTasks(response.data.data || []);
-        setPagination(response.data.pagination || createEmptyPagination());
+        setTasks(taskPage.data || []);
+        setPagination(taskPage.pagination || createEmptyPagination());
       } catch (error) {
         console.error('Error fetching tasks:', error);
         setTasks([]);
@@ -78,13 +78,13 @@ const ViewDailyTasks = () => {
   }, [page, project, projectId, selectedDate]);
 
   const refreshTasks = async () => {
-    const response = await engineerAPI.getDailyTasks(projectId, {
+    const taskPage = await engineerAPI.getDailyTasks(projectId, {
       date: selectedDate,
       page,
       limit: DEFAULT_LIMIT,
     });
-    setTasks(response.data.data || []);
-    setPagination(response.data.pagination || createEmptyPagination());
+    setTasks(taskPage.data || []);
+    setPagination(taskPage.pagination || createEmptyPagination());
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -97,7 +97,7 @@ const ViewDailyTasks = () => {
       setMessage('Task deleted successfully');
       await refreshTasks();
     } catch (error) {
-      setMessage('Error deleting task');
+      setMessage(error.message || 'Error deleting task');
     }
   };
 

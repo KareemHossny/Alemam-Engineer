@@ -37,11 +37,11 @@ const AddDailyTask = () => {
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const response = await engineerAPI.getMyProjects();
-        const projectData = response.data.find(p => p._id === projectId);
+        const projects = await engineerAPI.getMyProjects();
+        const projectData = projects.find((item) => item._id === projectId) || null;
         setProject(projectData);
       } catch (err) {
-        setMessage('Failed to load project details');
+        setMessage(err.message || 'Failed to load project details');
       } finally {
         setLoading(false);
       }
@@ -86,7 +86,7 @@ const AddDailyTask = () => {
     setMessage('');
 
     try {
-      const response = await engineerAPI.addDailyTasksBulk(
+      const bulkResult = await engineerAPI.addDailyTasksBulk(
         validTasks.map((task) => ({
           projectId,
           title: task.title,
@@ -94,9 +94,9 @@ const AddDailyTask = () => {
           date: selectedDate,
         }))
       );
-      const createdCount = response.data?.createdCount ?? validTasks.length;
+      const createdCount = bulkResult.createdCount || validTasks.length;
       
-      setMessage(response.data?.message || `${createdCount} daily task(s) added successfully!`);
+      setMessage(`${createdCount} daily task(s) added successfully!`);
       setTasks([{ title: '', note: '' }]);
       
       setTimeout(() => {
@@ -104,8 +104,8 @@ const AddDailyTask = () => {
       }, 2000);
       
     } catch (err) {
-      const fallbackMessage = err.response?.data?.message || 'Failed to add daily tasks';
-      setMessage(formatBulkFailureMessage(fallbackMessage, err.response?.data?.failedItems));
+      const fallbackMessage = err.message || 'Failed to add daily tasks';
+      setMessage(formatBulkFailureMessage(fallbackMessage, err.details?.failedItems));
     } finally {
       setSaving(false);
     }
