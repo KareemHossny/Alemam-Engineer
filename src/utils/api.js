@@ -57,6 +57,7 @@ export const engineerAPI = {
   
   // Projects
   getMyProjects: () => api.get('/engineer/projects'),
+  getDashboardStats: () => api.get('/engineer/dashboard/stats'),
   
   // Daily Tasks
   getDailyTasks: (projectId, filters) => api.get(`/engineer/daily-tasks/${projectId}`, {

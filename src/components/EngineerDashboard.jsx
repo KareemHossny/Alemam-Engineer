@@ -36,46 +36,18 @@ const EngineerDashboard = ({ onLogout, engineerInfo }) => {
 
   const fetchStats = async () => {
     try {
-      const projectsResponse = await engineerAPI.getMyProjects();
-      const projects = projectsResponse.data;
+      const response = await engineerAPI.getDashboardStats();
+      const dashboardStats = response.data?.data || {};
       
-      let pendingTasks = 0;
-      let completedTasks = 0;
-      let totalTasks = 0;
-
-      for (const project of projects) {
-        try {
-          const [dailyTasksResponse, monthlyTasksResponse] = await Promise.all([
-            engineerAPI.getDailyTasks(project._id),
-            engineerAPI.getMonthlyTasks(project._id)
-          ]);
-          
-          const dailyTasks = dailyTasksResponse.data;
-          const monthlyTasks = monthlyTasksResponse.data;
-          
-          // استخدام for...of بدلاً من forEach لتجنب مشاكل الإغلاق
-          for (const task of dailyTasks) {
-            totalTasks++;
-            if (task.status === 'pending') pendingTasks++;
-            if (task.status === 'done') completedTasks++;
-          }
-          
-          for (const task of monthlyTasks) {
-            totalTasks++;
-            if (task.status === 'pending') pendingTasks++;
-            if (task.status === 'done') completedTasks++;
-          }
-        } catch (error) {
-          console.error(`Error fetching tasks for project ${project._id}:`, error);
-        }
-      }
-
       setStats({
-        totalProjects: projects.length,
-        pendingTasks,
-        completedTasks,
-        totalTasks
+        totalProjects: dashboardStats.totalProjects || 0,
+        pendingTasks: dashboardStats.pendingTasks || 0,
+        completedTasks: dashboardStats.completedTasks || 0,
+        totalTasks: dashboardStats.totalTasks || 0
       });
+
+
+          // استخدام for...of بدلاً من forEach لتجنب مشاكل الإغلاق
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
