@@ -23,6 +23,18 @@ const shouldRedirectToLogin = (error) => {
   return window.location.pathname !== '/login';
 };
 
+const normalizeTaskFilters = (filtersOrDate) => {
+  if (!filtersOrDate) {
+    return undefined;
+  }
+
+  if (typeof filtersOrDate === 'string') {
+    return { date: filtersOrDate };
+  }
+
+  return filtersOrDate;
+};
+
 // Response Interceptor
 api.interceptors.response.use(
   (response) => {
@@ -47,15 +59,17 @@ export const engineerAPI = {
   getMyProjects: () => api.get('/engineer/projects'),
   
   // Daily Tasks
-  getDailyTasks: (projectId, date) => api.get(`/engineer/daily-tasks/${projectId}`, {
-    params: date ? { date } : undefined,
+  getDailyTasks: (projectId, filters) => api.get(`/engineer/daily-tasks/${projectId}`, {
+    params: normalizeTaskFilters(filters),
   }),
   addDailyTask: (taskData) => api.post('/engineer/daily-tasks', taskData),
   addDailyTasksBulk: (tasks) => api.post('/engineer/daily-tasks/bulk', tasks),
   deleteDailyTask: (taskId) => api.delete(`/engineer/daily-tasks/${taskId}`),
   
   // Monthly Tasks
-  getMonthlyTasks: (projectId) => api.get(`/engineer/monthly-tasks/${projectId}`),
+  getMonthlyTasks: (projectId, filters) => api.get(`/engineer/monthly-tasks/${projectId}`, {
+    params: normalizeTaskFilters(filters),
+  }),
   addMonthlyTask: (taskData) => api.post('/engineer/monthly-tasks', taskData),
   addMonthlyTasksBulk: (tasks) => api.post('/engineer/monthly-tasks/bulk', tasks),
   deleteMonthlyTask: (taskId) => api.delete(`/engineer/monthly-tasks/${taskId}`),
